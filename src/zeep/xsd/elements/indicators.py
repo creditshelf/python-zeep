@@ -234,7 +234,7 @@ class OrderIndicator(Indicator, list):
                     element_value = value
                     child_path = render_path
 
-                if element_value is SkipValue:
+                if element_value is SkipValue or element.name =="extendedmonitoring":
                     continue
 
                 if element_value is not None or not element.is_optional:
@@ -426,10 +426,7 @@ class Choice(OrderIndicator):
                             result.append(choice_value)
                             break
                     else:
-                        if isinstance(element, Any):
-                            result.append(value)
-                            break
-                        elif element.name in value:
+                        if element.name in value:
                             choice_value = value.get(element.name)
                             result.append({element.name: choice_value})
                             break
@@ -542,7 +539,7 @@ class Choice(OrderIndicator):
                 if name is not None:
                     try:
                         choice_value = value[name]
-                    except (KeyError, TypeError):
+                    except KeyError:
                         choice_value = value
                 else:
                     choice_value = value

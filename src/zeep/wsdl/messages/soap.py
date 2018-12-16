@@ -41,7 +41,6 @@ class SoapMessage(ConcreteMessage):
         self.abstract = None  # Set during resolve()
         self.type = type
 
-        self._is_body_wrapped = False
         self.body = None
         self.header = None
         self.envelope = None
@@ -55,30 +54,21 @@ class SoapMessage(ConcreteMessage):
 
         soap = ElementMaker(namespace=self.nsmap['soap-env'], nsmap=nsmap)
 
-        # Create the soap:envelope
-        envelope = soap.Envelope()
-
         # Create the soap:header element
         headers_value = kwargs.pop('_soapheaders', None)
         header = self._serialize_header(headers_value, nsmap)
-        if header is not None:
-            envelope.append(header)
 
-        # Create the soap:body element. The _is_body_wrapped attribute signals
-        # that the self.body element is of type soap:body, so we don't have to
-        # create it in that case. Otherwise we create a Element soap:body and
-        # render the content into this.
+        # Create the soap:body element
+        body = soap.Body()
         if self.body:
             body_value = self.body(*args, **kwargs)
-            if self._is_body_wrapped:
-                self.body.render(envelope, body_value)
-            else:
-                body = soap.Body()
-                envelope.append(body)
-                self.body.render(body, body_value)
-        else:
-            body = soap.Body()
-            envelope.append(body)
+            self.body.render(body, body_value)
+
+        # Create the soap:envelope
+        envelope = soap.Envelope()
+        if header is not None:
+            envelope.append(header)
+        envelope.append(body)
 
         # XXX: This is only used in Soap 1.1 so should be moved to the the
         # Soap11Binding._set_http_headers(). But let's keep it like this for
@@ -289,7 +279,7 @@ class SoapMessage(ConcreteMessage):
 
         # If this message has no parts then we have nothing to do. This might
         # happen for output messages which don't return anything.
-        if (abstract_message is None or not abstract_message.parts) and self.type != 'input':
+        if not abstract_message.parts and self.type != 'input':
             return
 
         self.abstract = abstract_message
@@ -409,6 +399,7 @@ class DocumentMessage(SoapMessage):
 
     def __init__(self, *args, **kwargs):
         super(DocumentMessage, self).__init__(*args, **kwargs)
+        self._is_body_wrapped = False
 
     def _deserialize_body(self, xmlelement):
 

@@ -159,18 +159,6 @@ class Element(Base):
                 item = self.parse(
                     xmlelement, schema, allow_none=True, context=context)
                 result.append(item)
-            elif (
-                  schema is not None and
-                  schema.settings.xsd_ignore_sequence_order and
-                  list(filter(lambda elem: etree.QName(elem.tag).localname == self.qname.localname, xmlelements))
-            ):
-                # Search for the field in remaining elements, not only the leftmost
-                xmlelement = list(filter(lambda elem: etree.QName(elem.tag).localname == self.qname.localname, xmlelements))[0]
-                xmlelements.remove(xmlelement)
-                num_matches += 1
-                item = self.parse(
-                    xmlelement, schema, allow_none=True, context=context)
-                result.append(item)
             else:
                 # If the element passed doesn't match and the current one is
                 # not optional then throw an error
@@ -242,12 +230,12 @@ class Element(Base):
 
             for val in value:
                 self._validate_item(val, render_path)
-        else:
-            if not self.is_optional and not self.nillable and value in (None, NotSet):
-                raise exceptions.ValidationError(
-                    "Missing element %s" % (self.name), path=render_path)
+        #else:
+         #   if not self.is_optional and not self.nillable and value in (None, NotSet):
+          #      raise exceptions.ValidationError(
+           #         "Missing element %s" % (self.name), path=render_path)
 
-            self._validate_item(value, render_path)
+            #self._validate_item(value, render_path)
 
     def _validate_item(self, value, render_path):
         if self.nillable and value in (None, NotSet):

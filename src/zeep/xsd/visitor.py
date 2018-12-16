@@ -91,8 +91,6 @@ class SchemaVisitor(object):
         if not ref:
             return
 
-        ref = self._create_qname(ref)
-
         if node.tag == tags.element:
             cls = xsd_elements.RefElement
         elif node.tag == tags.attribute:
@@ -131,12 +129,7 @@ class SchemaVisitor(object):
         """
         assert node is not None
 
-        # A schema should always have a targetNamespace attribute, otherwise
-        # it is called a chameleon schema. In that case the schema will inherit
-        # the namespace of the enclosing schema/node.
-        tns = node.get('targetNamespace')
-        if tns:
-            self.document._target_namespace = tns
+        self.document._target_namespace = node.get('targetNamespace')
         self.document._element_form = node.get('elementFormDefault', 'unqualified')
         self.document._attribute_form = node.get('attributeFormDefault', 'unqualified')
 
@@ -214,14 +207,7 @@ class SchemaVisitor(object):
                 filename=self.document._location,
                 sourceline=node.sourceline)
 
-        # If the imported schema doesn't define a target namespace and the
-        # node doesn't specify it either then inherit the existing target
-        # namespace.
-        elif not schema_tns and not namespace:
-            namespace = self.document._target_namespace
-
-        schema = self.schema.create_new_document(
-            schema_node, location, target_namespace=namespace)
+        schema = self.schema.create_new_document(schema_node, location)
         self.register_import(namespace, schema)
         return schema
 
@@ -1171,8 +1157,6 @@ class SchemaVisitor(object):
                 namespace=name.namespace, schemaLocation=name.namespace)
             self.visit_import(import_node, None)
 
-        if not name.namespace and self.document._element_form == 'qualified' and self.document._target_namespace:
-            name = etree.QName(self.document._target_namespace, name.localname)
         return name
 
     def _pop_annotation(self, items):

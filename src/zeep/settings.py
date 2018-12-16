@@ -34,10 +34,6 @@ class Settings(object):
      approach to add http headers for specific calls.
     :type extra_headers: list
 
-    :param xsd_ignore_sequence_order: boolean to indicate whether to enforce sequence
-     order when parsing complex types. This is a workaround for servers that
-     don't respect sequence order.
-    :type xsd_ignore_sequence_order: boolean
     """
     strict = attr.ib(default=True)
     raw_response = attr.ib(default=False)
@@ -51,9 +47,6 @@ class Settings(object):
     forbid_dtd = attr.ib(default=False)
     forbid_entities = attr.ib(default=True)
     forbid_external = attr.ib(default=True)
-
-    # xsd workarounds
-    xsd_ignore_sequence_order = attr.ib(default=False)
 
     _tls = attr.ib(default=attr.Factory(threading.local))
 

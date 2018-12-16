@@ -153,6 +153,7 @@ class SoapBinding(Binding):
 
         content_type = response.headers.get('Content-Type', 'text/xml')
         media_type = get_media_type(content_type)
+        content_type = content_type.replace("Multipart/Related", media_type)
         message_pack = None
 
         # If the reply is a multipart/related then we need to retrieve all the
@@ -341,6 +342,41 @@ class Soap12Binding(SoapBinding):
 
         # TODO: We should use the fault message as defined in the wsdl.
         detail_node = fault_node.find('soap-env:Detail', namespaces=self.nsmap)
+
+        from xml.etree import ElementTree
+
+        
+        try:
+            tech_message = detail_node.find("ns2:servicefault/ns2:body/ns2:errorkey/ns2:designation",
+                             namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text
+        except Exception:
+            tech_message = ""
+
+        try:
+            tech_fault_message = detail_node.find("ns2:servicefault/ns2:body/ns2:fault/ns2:errorkey/ns2:designation",
+                                            namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text
+        except Exception:
+            tech_fault_message = ""
+
+
+        try:
+            tech_detail_message = detail_node.find("ns2:servicefault/ns2:body/ns2:fault/ns2:errorfield",
+                                              namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text
+        except Exception:
+            tech_detail_message = ""
+
+        tech_fault = tech_message + tech_fault_message + tech_detail_message
+
+
+        try:
+            validation_message = detail_node.find("tns:validationfault",
+                                              namespaces={"tns": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text
+        except Exception:
+            validation_message = ""
+
+
+        detail_node = tech_fault + validation_message
+            
         raise Fault(
             message=message,
             code=code,

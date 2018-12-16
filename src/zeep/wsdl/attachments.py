@@ -43,8 +43,8 @@ class MessagePack(object):
 
         """
         for attachment in self.attachments:
-            if attachment.content_id == content_id:
-                return attachment
+            #if attachment.content_id == content_id:
+            return attachment
 
 
 class Attachment(object):

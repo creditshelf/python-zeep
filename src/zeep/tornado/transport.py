@@ -124,12 +124,11 @@ class TornadoAsyncTransport(Transport):
             kwargs['body'] = message
 
         http_req = httpclient.HTTPRequest(address, **kwargs)
-        response = yield async_client.fetch(http_req, raise_error=False)
+        response = yield async_client.fetch(http_req)
 
         raise gen.Return(self.new_response(response))
 
-    @staticmethod
-    def new_response(response):
+    def new_response(self, response):
         """Convert an tornado.HTTPResponse object to a requests.Response object"""
         new = Response()
         new._content = response.body
