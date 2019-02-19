@@ -345,12 +345,17 @@ class Soap12Binding(SoapBinding):
 
         from xml.etree import ElementTree
 
-        
         try:
             tech_message = detail_node.find("ns2:servicefault/ns2:body/ns2:errorkey/ns2:designation",
-                             namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text
+                             namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text + " "
         except Exception:
             tech_message = ""
+
+        try:
+            tech_errorkey_message = detail_node.find("ns2:servicefault/ns2:body/ns2:fault/ns2:errorkey/ns2:key",
+                         namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text+ ". "
+        except Exception:
+            tech_errorkey_message = ""
 
         try:
             tech_fault_message = detail_node.find("ns2:servicefault/ns2:body/ns2:fault/ns2:errorkey/ns2:designation",
@@ -358,14 +363,13 @@ class Soap12Binding(SoapBinding):
         except Exception:
             tech_fault_message = ""
 
-
         try:
             tech_detail_message = detail_node.find("ns2:servicefault/ns2:body/ns2:fault/ns2:errorfield",
                                               namespaces={"ns2": "https://onlineservice.creditreform.de/webservice/0600-0021"}).text
         except Exception:
             tech_detail_message = ""
 
-        tech_fault = tech_message + tech_fault_message + tech_detail_message
+        tech_fault = tech_message + tech_errorkey_message + tech_fault_message + tech_detail_message
 
 
         try:
